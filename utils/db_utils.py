@@ -1,7 +1,4 @@
-def run_sql_query(query: str) -> str:
-    print(f"Running query: {query}")
-    return "id:1,name:Alice\nid:2,name:Bob"  # Mocked data
-
-def update_database(query: str) -> bool:
-    print(f"Updating database with:\n{query}")
-    return True  # Always succeeds for now
+def obtain_header(path) -> str:
+    with open(path, "r") as file:
+        header = file.readline().strip()
+    return header

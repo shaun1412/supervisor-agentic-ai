@@ -2,3 +2,6 @@ venv/
 __pycache__/
 *.py[cod]
 *$py.class
+
+example_data/query.sql
+example_data/sales_database.db

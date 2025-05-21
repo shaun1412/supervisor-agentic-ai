@@ -1,13 +1,16 @@
 from agents_state import AgentState
 from langchain_ollama import ChatOllama
 from langchain.schema import SystemMessage, HumanMessage
+from utils.db_utils import obtain_header
 
 llm = ChatOllama(model="llama3")
 
 def verifier_agent(state: AgentState) -> AgentState:
+
+    header = obtain_header(state["csv_path"] + state["csv_file"]) 
     messages = [
         SystemMessage(content="You are a professional SQL code verifier. The first word you return must either be Pass or Fail."),
-        HumanMessage(content=f"Verify the following SQL query \n\n{state['sql_query']}\n\n can be executed on the file located at \n\n{state['csv_path']}\n\nand satisfies the following request:\n\n{state['user_query']}\n\n If it does, return Pass. If it doesn't, return Fail. \n\n Afterwards, give a brief explanation of why it passes or fails.")
+        HumanMessage(content=f"Verify the following SQL query: \n{state['sql_query']}\n can be executed on the file: \nsales_database\n given the following header \n{header}\nand satisfies the following request:\n\n{state['user_query']}\n\n If it does and there are no issues, return Pass. If it doesn't, return Fail. \n\n Ensure the syntax is correct too. Afterwards, give a brief explanation of why it passes or fails.")
     ]
 
     verification = llm.invoke(messages).content.strip()

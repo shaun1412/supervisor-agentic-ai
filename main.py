@@ -1,11 +1,12 @@
-from supervisor import build_graph
+from graph import build_graph
 from agents_state import AgentState
 
 if __name__ == "__main__":
     initial_state = AgentState(
         messages=[],
-        csv_path="example_data/sales_data_small.csv",
-        user_query="List out the names of all sales agents with a total transaction amount greater than 1000.",
+        csv_path="example_data/",
+        csv_file="sales_data.csv",
+        user_query="For each sales agent, return the total sales amount. The result should be ordered by sales amount in descending order.",
         verification_status=None,
         sql_query=None,
         result=None
@@ -14,4 +15,4 @@ if __name__ == "__main__":
     graph = build_graph()
     print("User Query:", initial_state["user_query"], "\n")
     result = graph.invoke(initial_state)
-    print("Final Result:", result)
+    # print("Final Result:", result)

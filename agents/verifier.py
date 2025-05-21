@@ -16,7 +16,5 @@ def verifier_agent(state: AgentState) -> AgentState:
     verification_status = verification.split()[0].strip()[0:4]
     if verification_status not in ["Pass", "Fail"]:
         raise ValueError(f"Unexpected verification status: {verification_status}")
-    
-    explanation = " ".join(verification.split()[1:])
 
     return {**state, "verification_status": verification_status, "messages": [{"name": "verifier_agent", "content": verification}]}

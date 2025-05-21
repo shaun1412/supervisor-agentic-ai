@@ -14,17 +14,10 @@ def puller_agent(state: AgentState) -> AgentState:
     header = obtain_header(path)
     if header is None:
         raise ValueError("Failed to obtain header from the CSV file.")
-    print(f"Header of the CSV file:\n{header}\n")
     #^
 
-    #Need some sort of feedback loop, temporary solution
-    feedback = "This is your history of work between yourself and a verifier agent:"
-
-    if state["messages"] is None:
-        feedback = ""
-
     messages = [
-        SystemMessage(content=f"You are an expert SQL assistant called puller agent. Only output a valid SQL SELECT query. {feedback} + {state['messages']}"),
+        SystemMessage(content=f"You are an expert SQL assistant called puller agent. Only output a valid SQL SELECT query. Chat history: {state['messages']}"),
         HumanMessage(content=f"Given the first line of the CSV file: \n\n{header}\n, Only return the raw SQL query that answers this request. No explanation, no formatting, no markdown:\n\n{state['user_query']}\n\n The location of the CSV file is: {path}")
     ]
     

@@ -1,9 +1,8 @@
 from agents_state import AgentState
-from utils.db_utils import obtain_header
-from langchain_ollama import ChatOllama
-from langchain.schema import SystemMessage, HumanMessage
+from utils.db_utils import obtain_header, obtain_first_line_after_header
+from langchain.schema import SystemMessage, HumanMessage, AIMessage
+from agents.llm import llm
 
-llm = ChatOllama(model="llama3")
 
 def coder_agent(state: AgentState) -> AgentState:
 
@@ -11,21 +10,33 @@ def coder_agent(state: AgentState) -> AgentState:
     print(state["csv_path"] + state["csv_file"])
 
     header = obtain_header(state["csv_path"] + state["csv_file"])
-    print(f"\nHeader of the CSV file:\n{header}\n")
-    if header is None:
-        raise ValueError("Failed to obtain header from the CSV file.")
-    #^
+    first_line = obtain_first_line_after_header(state["csv_path"] + state["csv_file"])
 
-    messages = [
-        SystemMessage(content=f"You are an expert SQL assistant called coder agent. Only output a valid SQL SELECT query. No explanation, no formatting, no markdown. Chat history: {state['messages'][-1] if state['messages'] else ''}"),
-        HumanMessage(content=f"Given the first line of the table: \n{header}\n called sales_database,\n Only return the raw SQL query that answers this request: \n{state['user_query']}\n.")
-    ]
+    system = SystemMessage(
+        content=(
+            "You are an expert SQL assistant called coder_agent."
+            "Only output a valid SQL SELECT query. No explanation, no formatting, no markdown."
+        )
+    )
+
+    #obtain the last 3 messages from the history
+    history = state["messages"][-2:] if len(state["messages"]) > 2 else state["messages"]
+
+    user = HumanMessage(
+        content=(
+            f"Given the first line of the table:\n{header}\n"
+            f"and the first line of data from the table:\n{first_line}\n"
+            "called sales_database.db,\n"
+            "Only return the raw SQL query that answers this request:\n"
+            f"{state['user_query']}"
+        )
+    )
+
+    all_messages = [system, *history, user]
     
+    ai_response = llm.invoke(all_messages).content.strip() #sql query
     
-    sql_query = llm.invoke(messages).content.strip()
-    
 
+    print(f"\nLLM Generated SQL (Coder):\n{ai_response}\n")
 
-    print(f"\nLLM Generated SQL (Coder):\n{sql_query}\n")
-
-    return {**state, "sql_query": sql_query, "messages": [{"name": "coder_agent", "content": sql_query}]}
+    return {**state, "sql_query": ai_response, "messages": [user, AIMessage(content=ai_response, name="coder_agent")]}

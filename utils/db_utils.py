@@ -6,6 +6,14 @@ def obtain_header(path) -> str:
         header = file.readline().strip()
     return header
 
+def obtain_first_line_after_header(path) -> str:
+    with open(path, "r") as file:
+        lines = file.readlines()
+        if len(lines) > 1:
+            return lines[1].strip()
+        else:
+            return None
+
 #create sql file given a path and the code
 def create_sql_file(path: str, code: str) -> None:
     with open(path, "w") as file:
@@ -27,9 +35,9 @@ def execute_sql_file(csv_path: str, sql_path: str) -> str:
     try:
         df = pd.read_sql_query(sql_script, conn)
         print("SQL query executed successfully.")
-        return df
+        return "Pass", df
     except Exception as e:
         print(f"Error executing SQL query: {e}")
-        return None
+        return "Fail", e
     finally:
         conn.close()
